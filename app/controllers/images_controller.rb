@@ -3,7 +3,7 @@ class ImagesController < ApplicationController
   before_action :set_image, only: [:show, :edit, :update, :destroy]
   
   def index
-    @images = Image.all
+    @images = Image.where user_id: current_user.id
   end
   
   def new
@@ -11,11 +11,13 @@ class ImagesController < ApplicationController
   end
   
   def create
-    # render plain: params[:image].inspect
-    @image = Image.new image_params
-    @image.save
+    @image = current_user.images.new image_params
     
-    redirect_to @image
+    if @image.save
+      return redirect_to images_path
+    end
+
+    render :new
   end
   
   def show
@@ -37,7 +39,7 @@ class ImagesController < ApplicationController
   private
   
   def image_params
-    params.require(:image).permit :description, :picture
+    params.require(:image).permit(:description, :picture)
   end
   
   def set_image
